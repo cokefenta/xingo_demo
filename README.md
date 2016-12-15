@@ -1,4 +1,4 @@
-# xingo_dem
+# xingo_demo xingo 的带unity3d 客户端的服务器端demo
 //消息对应关系如下
 /*
 msgId            client                 server               描述
