@@ -10,7 +10,7 @@ import (
 
 type WorldMgr struct {
 	PlayerNumGen int32
-	Players      map[string]*Player
+	Players      map[int32]*Player
 	sync.RWMutex
 }
 
@@ -19,28 +19,41 @@ var WorldMgrObj *WorldMgr
 func init() {
 	WorldMgrObj = &WorldMgr{
 		PlayerNumGen:    0,
-		Players:         make(map[string]*Player),
+		Players:         make(map[int32]*Player),
 	}
 }
 
-func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (error) {
+func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 	this.Lock()
 	defer this.Unlock()
 	this.PlayerNumGen += 1
-	p := &NewPlayer(fconn, this.PlayerNumGen)
+	p := NewPlayer(fconn, this.PlayerNumGen)
 	this.Players[p.Pid] = p
+	//同步Pid
+	msg := &pb.SyncPid{
+		Pid: p.Pid,
+	}
+	p.SendMsg(1, msg)
 	//出现在出生点
 	this.Move(p)
-	return nil
+	return p, nil
+}
+
+func (this *WorldMgr)RemovePlayer(pid int32){
+	this.Lock()
+	defer this.Unlock()
+	delete(this.Players, pid)
 }
 
 func (this *WorldMgr)Move(p *Player){
 	data := &pb.BroadCast{
 		Pid : p.Pid,
 		Tp: 2,
-		P: &pb.Position{
+		Data: &pb.BroadCast_P{
+			P: &pb.Position{
 			X: p.X,
 			Y: p.Y,
+			},
 		},
 	}
 	this.Broadcast(200, data)
@@ -51,7 +64,7 @@ func (this *WorldMgr) GetPlayer(pid int32)(*Player, error){
 	if ok{
 		return p, nil
 	}else{
-		return nil, errors.new("no player in the world!!!")
+		return nil, errors.New("no player in the world!!!")
 	}
 }
 

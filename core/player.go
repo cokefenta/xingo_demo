@@ -33,9 +33,16 @@ func (this *Player) Talk(content string){
 	data := &pb.BroadCast{
 		Pid : this.Pid,
 		Tp: 1,
-		Content: content,
+		Data: &pb.BroadCast_Content{
+			Content: content,
+		},
 	}
+
 	WorldMgrObj.Broadcast(200, data)
+}
+
+func (this *Player) LostConnection(){
+	WorldMgrObj.Broadcast(201, nil)
 }
 
 func (this *Player) SendMsg(msgId uint32, data proto.Message) {
