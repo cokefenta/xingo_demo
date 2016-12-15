@@ -4,6 +4,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/viphxin/xingo/iface"
 	"xingo_demo/pb"
+	"math/rand"
 )
 
 type Player struct {
@@ -17,8 +18,8 @@ func NewPlayer(fconn iface.Iconnection, pid int32) *Player {
 	p := &Player{
 		Fconn: fconn,
 		Pid:   pid,
-		X:     2.0,
-		Y:     2.0,
+		X:     float32(rand.Intn(161) + 160),
+		Y:     float32(rand.Intn(217) + 134),
 	}
 	return p
 }
@@ -42,7 +43,10 @@ func (this *Player) Talk(content string){
 }
 
 func (this *Player) LostConnection(){
-	WorldMgrObj.Broadcast(201, nil)
+	msg := &pb.SyncPid{
+		Pid: this.Pid,
+	}
+	WorldMgrObj.Broadcast(201, msg)
 }
 
 func (this *Player) SendMsg(msgId uint32, data proto.Message) {

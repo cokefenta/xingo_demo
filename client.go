@@ -136,6 +136,20 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 			this.Send(2, msg)
 		}else{
 			//移动
+			x := this.X
+			y := this.Y
+			if x >=410{
+				x -= 1
+			}else if x < 85{
+				x += 1
+			}
+
+			if y >=400{
+				y -= 1
+			}else if y < 75{
+				y += 1
+			}
+
 			msg := &pb.Position{
 				X: this.X + 1,
 				Y : this.Y + 1,
@@ -185,7 +199,7 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 50; i ++{
+	for i := 0; i< 1; i ++{
 		client := NewTcpClient("0.0.0.0", 8909)
 		client.Start()
 		time.Sleep(1*time.Second)
