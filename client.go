@@ -123,7 +123,7 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 			this.X = bdata.GetP().X
 			this.Y = bdata.GetP().Y
 		}else{
-			fmt.Println(fmt.Sprintf("世界聊天,%i: %s", bdata.Pid, bdata.GetContent()))
+			fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
 		}
 		//聊天或者移动
 		time.Sleep(3*time.Second)
@@ -185,9 +185,10 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 5; i ++{
+	for i := 0; i< 50; i ++{
 		client := NewTcpClient("0.0.0.0", 8909)
 		client.Start()
+		time.Sleep(1*time.Second)
 	}
 
 	// close
