@@ -35,7 +35,7 @@ func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 	}
 	p.SendMsg(1, msg)
 	//出现在出生点
-	this.Move(p)
+	this.Move(p, -1)
 	return p, nil
 }
 
@@ -45,16 +45,29 @@ func (this *WorldMgr)RemovePlayer(pid int32){
 	delete(this.Players, pid)
 }
 
-func (this *WorldMgr)Move(p *Player){
-	data := &pb.BroadCast{
-		Pid : p.Pid,
-		Tp: 2,
-		Data: &pb.BroadCast_P{
-			P: &pb.Position{
-			X: p.X,
-			Y: p.Y,
+func (this *WorldMgr)Move(p *Player, action int32){
+	var data *pb.BroadCast
+	if action == -1{
+		//出生
+		data = &pb.BroadCast{
+			Pid : p.Pid,
+			Tp: 2,
+			Data: &pb.BroadCast_P{
+				P: &pb.Position{
+				X: p.X,
+				Y: p.Y,
+				},
 			},
-		},
+		}
+	}else{
+		//不广播坐标, 广播动作数据
+		data = &pb.BroadCast{
+			Pid : p.Pid,
+			Tp: 3,
+			Data: &pb.BroadCast_ActionData{
+				ActionData: action,
+			},
+		}
 	}
 	this.Broadcast(200, data)
 }

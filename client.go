@@ -28,6 +28,35 @@ type TcpClient struct{
 	Pid int32
 }
 
+type INPUT int32
+
+const (
+	_       = iota
+	UP INPUT = 1 << iota
+	DOWN
+	LEFT
+	RIGHT
+	ROTATE_LEFT
+	ROTATE_RIGHT
+)
+
+/*
+简单AI规则
+ */
+func GenActionData() int32{
+	var action int32 = 0
+	//gen op count
+	opCount := rand.Intn(6) + 1
+
+	for i := 0; i < opCount; i++{
+		v := rand.Intn(2)
+		if v == 1 {
+			action += 1 << uint(i)
+		}
+	}
+	return action
+}
+
 func NewTcpClient(ip string, port int) *TcpClient{
 	addr := &net.TCPAddr{
 		IP: net.ParseIP(ip),
@@ -122,6 +151,7 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 		if bdata.Tp == 2{
 			this.X = bdata.GetP().X
 			this.Y = bdata.GetP().Y
+			fmt.Println(fmt.Sprintf("player ID: %d" , bdata.Pid))
 		}else{
 			fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
 		}
@@ -149,17 +179,21 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 			}else if y < 75{
 				y += 1
 			}
-
-			msg := &pb.Position{
+			msg := &pb.MovePackege{
+				P : &pb.Position{
 				X: this.X + 1,
 				Y : this.Y + 1,
+				},
+				ActionData: GenActionData(),
 			}
+
 			this.Send(3, msg)
 		}
 	}
 }
 
 func (this *TcpClient)Send(msgID uint32, data proto.Message){
+	fmt.Println("Send")
 	dd, err := this.Pack(msgID, data)
 	if err == nil{
 		this.conn.Write(dd)

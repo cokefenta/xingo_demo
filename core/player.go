@@ -18,16 +18,16 @@ func NewPlayer(fconn iface.Iconnection, pid int32) *Player {
 	p := &Player{
 		Fconn: fconn,
 		Pid:   pid,
-		X:     float32(rand.Intn(161) + 160),
-		Y:     float32(rand.Intn(217) + 134),
+		X:     float32(rand.Intn(10) + 160),
+		Y:     float32(rand.Intn(17) + 134),
 	}
 	return p
 }
 
-func (this *Player) UpdatePos(x float32, y float32) {
+func (this *Player) UpdatePos(x float32, y float32, action int32) {
 	this.X = x
 	this.Y = y
-	WorldMgrObj.Move(this)
+	WorldMgrObj.Move(this, action)
 }
 
 func (this *Player) Talk(content string){
