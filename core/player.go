@@ -24,6 +24,26 @@ func NewPlayer(fconn iface.Iconnection, pid int32) *Player {
 	return p
 }
 
+/*
+同步周围玩家
+ */
+func (this *Player) SyncSurrouding(){
+	/*暂时取全部, 等aoi模块完成*/
+	msg := &pb.SyncPlayers{}
+
+	for pid, player := range WorldMgrObj.Players{
+		p := &pb.Player{
+			Pid: pid,
+			P: &pb.Position{
+				X: player.X,
+				Y: player.Y,
+			},
+		}
+		msg.Ps = append(msg.Ps, p)
+	}
+	this.SendMsg(202, msg)
+}
+
 func (this *Player) UpdatePos(x float32, y float32, action int32) {
 	this.X = x
 	this.Y = y

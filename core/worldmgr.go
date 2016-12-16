@@ -35,7 +35,8 @@ func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 	}
 	p.SendMsg(1, msg)
 	//出现在出生点
-	this.Move(p, -1)
+	//this.Move(p, -1)
+	p.SyncSurrouding()
 	return p, nil
 }
 
