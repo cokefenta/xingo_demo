@@ -56,7 +56,7 @@ func (this *TestRouter) Api_3(request *fnet.PkgAll) {
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil{
 			p, _ := core.WorldMgrObj.GetPlayer(pid.(int32))
-			p.UpdatePos(msg.P.X, msg.P.Y, msg.ActionData)
+			p.UpdatePos(msg.P.X, msg.P.Y, msg.P.V, msg.ActionData)
 		}else{
 			logger.Error(err1)
 			request.Fconn.LostConnection()

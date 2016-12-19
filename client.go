@@ -25,6 +25,7 @@ type TcpClient struct{
 	addr *net.TCPAddr
 	X float32
 	Y float32
+	V float32
 	Pid int32
 }
 
@@ -151,6 +152,7 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 		if bdata.Tp == 2{
 			this.X = bdata.GetP().X
 			this.Y = bdata.GetP().Y
+			this.V = bdata.GetP().V
 			fmt.Println(fmt.Sprintf("player ID: %d" , bdata.Pid))
 		}else{
 			fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
@@ -182,7 +184,8 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 			msg := &pb.MovePackege{
 				P : &pb.Position{
 				X: this.X + 1,
-				Y : this.Y + 1,
+				Y: this.Y + 1,
+				V: this.V,
 				},
 				ActionData: GenActionData(),
 			}
@@ -233,7 +236,7 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 1; i ++{
+	for i := 0; i< 2; i ++{
 		client := NewTcpClient("0.0.0.0", 8909)
 		client.Start()
 		time.Sleep(1*time.Second)
