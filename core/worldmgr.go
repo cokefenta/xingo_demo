@@ -28,10 +28,10 @@ func init() {
 
 func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 	this.Lock()
-	defer this.Unlock()
 	this.PlayerNumGen += 1
 	p := NewPlayer(fconn, this.PlayerNumGen)
 	this.Players[p.Pid] = p
+	this.Unlock()
 	//同步Pid
 	msg := &pb.SyncPid{
 		Pid: p.Pid,
@@ -90,6 +90,8 @@ func (this *WorldMgr)SendMsgByPid(pid int32, msgId uint32, data proto.Message){
 }
 
 func (this *WorldMgr) GetPlayer(pid int32)(*Player, error){
+	this.RLock()
+	defer this.RUnlock()
 	p, ok := this.Players[pid]
 	if ok{
 		return p, nil
@@ -99,6 +101,8 @@ func (this *WorldMgr) GetPlayer(pid int32)(*Player, error){
 }
 
 func (this *WorldMgr) Broadcast(msgId uint32, data proto.Message) {
+	this.RLock()
+	defer this.RUnlock()
 	for _, p := range this.Players {
 		p.SendMsg(msgId, data)
 	}

@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/viphxin/xingo/logger"
-	"time"
+	_ "time"
+	"sync"
 )
 
 /*
@@ -17,17 +18,24 @@ type Grid struct {
 	maxX int32
 	maxY int32
 	pids map[int32]bool
+	sync.RWMutex
 }
 
 func (this *Grid)Add(pid int32){
+	this.Lock()
+	defer this.Unlock()
 	this.pids[pid] = true
 }
 
 func (this *Grid)Remove(pid int32){
+	this.Lock()
+	defer this.Unlock()
 	delete(this.pids, pid)
 }
 
 func (this *Grid)GetPids() []int32{
+	this.RLock()
+	defer this.RUnlock()
 	pids := make([]int32, 0)
 	for pid, _ :=range this.pids{
 		pids = append(pids, pid)
@@ -60,18 +68,18 @@ func NewAOIMgr(minX int32, maxX int32, minY int32, maxY int32, lenX int32, lenY 
 	}
 	AOIObj.InitGrid()
 	//debug
-	go func(){
-		for{
-			logger.Info("grids==================")
-			for gridid, grid := range AOIObj.GetGrids(){
-				if len(grid.GetPids()) > 0{
-					logger.Info(fmt.Sprintf("grid: %d. %s", gridid, grid.GetPids()))
-				}
-			}
-			time.Sleep(3*time.Second)
-		}
-
-	}()
+	//go func(){
+	//	for{
+	//		logger.Info("grids==================")
+	//		for gridid, grid := range AOIObj.GetGrids(){
+	//			if len(grid.GetPids()) > 0{
+	//				logger.Info(fmt.Sprintf("grid: %d. %s", gridid, grid.GetPids()))
+	//			}
+	//		}
+	//		time.Sleep(3*time.Second)
+	//	}
+	//
+	//}()
 	return AOIObj
 }
 
