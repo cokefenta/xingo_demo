@@ -22,7 +22,7 @@ func init() {
 	WorldMgrObj = &WorldMgr{
 		PlayerNumGen:    0,
 		Players:         make(map[int32]*Player),
-		AoiObj1:          NewAOIMgr(85, 410, 75, 400, 30, 30),
+		AoiObj1:          NewAOIMgr(85, 410, 75, 400, 20, 20),
 	}
 }
 
@@ -38,7 +38,7 @@ func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 	}
 	p.SendMsg(1, msg)
 	//出现在出生点
-	this.Move(p, -1)
+	//this.Move(p, -1)
 	//加到aoi
 	this.AoiObj1.Add2AOI(p)
 	//周围的人
@@ -69,6 +69,7 @@ func (this *WorldMgr)Move(p *Player, action int32){
 				},
 			},
 		}
+		p.SendMsg(200, data)
 	}else{
 		//不广播坐标, 广播动作数据
 		data = &pb.BroadCast{
@@ -78,8 +79,8 @@ func (this *WorldMgr)Move(p *Player, action int32){
 				ActionData: action,
 			},
 		}
+		this.Broadcast(200, data)
 	}
-	this.Broadcast(200, data)
 }
 
 func (this *WorldMgr)SendMsgByPid(pid int32, msgId uint32, data proto.Message){

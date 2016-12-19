@@ -6,6 +6,7 @@ import (
 	"github.com/viphxin/xingo/logger"
 	_ "time"
 	"sync"
+	"time"
 )
 
 /*
@@ -68,18 +69,18 @@ func NewAOIMgr(minX int32, maxX int32, minY int32, maxY int32, lenX int32, lenY 
 	}
 	AOIObj.InitGrid()
 	//debug
-	//go func(){
-	//	for{
-	//		logger.Info("grids==================")
-	//		for gridid, grid := range AOIObj.GetGrids(){
-	//			if len(grid.GetPids()) > 0{
-	//				logger.Info(fmt.Sprintf("grid: %d. %s", gridid, grid.GetPids()))
-	//			}
-	//		}
-	//		time.Sleep(3*time.Second)
-	//	}
-	//
-	//}()
+	go func(){
+		for{
+			logger.Info("grids==================")
+			for gridid, grid := range AOIObj.GetGrids(){
+				if len(grid.GetPids()) > 0{
+					logger.Info(fmt.Sprintf("grid: %d. %s", gridid, grid.GetPids()))
+				}
+			}
+			time.Sleep(3*time.Second)
+		}
+
+	}()
 	return AOIObj
 }
 
@@ -219,6 +220,7 @@ func (this *AOIMgr)GetSurroundingGrids(px float32, py float32) ([]*Grid, error){
 func (this *AOIMgr)GetSurroundingPids(p *Player) ([]int32, error){
 	pids := make([]int32, 0)
 	grids, err := this.GetSurroundingGrids(p.X, p.Y)
+	logger.Info(len(grids))
 	if err == nil{
 		for _, grid := range grids{
 			pids = append(pids, grid.GetPids()...)
@@ -226,7 +228,7 @@ func (this *AOIMgr)GetSurroundingPids(p *Player) ([]int32, error){
 	}else{
 		return nil, err
 	}
-
+	logger.Info(len(pids))
 	return pids, nil
 }
 

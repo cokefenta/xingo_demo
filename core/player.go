@@ -61,6 +61,19 @@ func (this *Player) SyncSurrouding(){
 					},
 				}
 				msg.Ps = append(msg.Ps, p)
+				//出现在周围人的视野
+				data := &pb.BroadCast{
+					Pid : this.Pid,
+					Tp: 2,
+					Data: &pb.BroadCast_P{
+						P: &pb.Position{
+						X: this.X,
+						Y: this.Y,
+						V: this.V,
+						},
+					},
+				}
+				player.SendMsg(200, data)
 			}
 		}
 		this.SendMsg(202, msg)
@@ -111,30 +124,61 @@ func (this *Player)OnExchangeAoiGrid(oldGridId int32, newGridId int32) error{
 		}
 	}
 
+	newAoiGridsMap := make(map[int32]bool, 0)
+	for _, newGrid := range newAoiGrids{
+		if _, ok := newAoiGridsMap[newGrid.ID]; ok != true{
+			newAoiGridsMap[newGrid.ID] = true
+		}
+	}
+
 	for gid, grid := range union{
 		//出生
 		if _, ok := oldAoiGridsMap[gid]; ok != true{
 			data := &pb.BroadCast{
-			Pid : this.Pid,
-			Tp: 2,
-			Data: &pb.BroadCast_P{
-				P: &pb.Position{
-				X: this.X,
-				Y: this.Y,
-				V: this.V,
+				Pid : this.Pid,
+				Tp: 2,
+				Data: &pb.BroadCast_P{
+					P: &pb.Position{
+					X: this.X,
+					Y: this.Y,
+					V: this.V,
+					},
 				},
-			},
 			}
 			for _, pid := range grid.GetPids(){
-				WorldMgrObj.SendMsgByPid(pid, 200, data)
+				if pid != this.Pid{
+					p, _ := WorldMgrObj.GetPlayer(pid)
+					pdata := &pb.BroadCast{
+						Pid : p.Pid,
+						Tp: 2,
+						Data: &pb.BroadCast_P{
+							P: &pb.Position{
+							X: p.X,
+							Y: p.Y,
+							V: p.V,
+							},
+						},
+					}
+					p.SendMsg(200, data)
+					this.SendMsg(200, pdata)
+				}
+
 			}
-		}else {
+		}
+		if _, ok := newAoiGridsMap[gid]; ok != true{
 			//消失
 			data := &pb.SyncPid{
 				Pid: this.Pid,
 			}
 			for _, pid := range grid.GetPids(){
-				WorldMgrObj.SendMsgByPid(pid, 201, data)
+				if pid != this.Pid{
+					p, _ := WorldMgrObj.GetPlayer(pid)
+					pdata := &pb.SyncPid{
+						Pid: p.Pid,
+					}
+					p.SendMsg(201, data)
+					this.SendMsg(201, pdata)
+				}
 			}
 		}
 	}
