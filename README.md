@@ -2,6 +2,14 @@
 该demo实现了mmo游戏的基础模块aoi(基于兴趣范围的广播), 世界聊天， 空间管理等
 客户端demo地址(https://git.oschina.net/viphxin/xingo_demo_unity3d)
 截图展示：
+链接服务器：(unity3d/pictures/p1.png)
+游戏主场景: (unity3d/pictures/p2.png)
+测试步骤:
+1) 开启服务器xingo_demo
+./server (配置文件路径xingo_demo/conf/server.json)
+2)开启机器人
+./client_walk
+3)在window上面跑unity pc客户端测试, pc包路径： xingo_demo/unity3d/bin/client.exe
 
 消息对应关系如下
 |msgId            |client                 |server               |描述
