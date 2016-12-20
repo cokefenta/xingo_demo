@@ -18,7 +18,8 @@ message SyncPlayers{
 message Position{
 	float X=1;
 	float Y=2;
-	float V=3;
+	float Z=3;
+	float V=4;
 }
 
 message MovePackege{

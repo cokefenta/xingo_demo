@@ -1,4 +1,4 @@
-package xin
+package main
 
 import (
 	"net"
@@ -142,7 +142,7 @@ func (this *TcpClient) Pack(msgId uint32, data proto.Message) (out []byte, err e
 
 func (this *TcpClient)DoMsg(pdata *PkgData){
 	//处理消息
-	fmt.Println(fmt.Sprintf("msg id :%d, data len: %d", pdata.MsgId, pdata.Len))
+	//fmt.Println(fmt.Sprintf("msg id :%d, data len: %d", pdata.MsgId, pdata.Len))
 	if pdata.MsgId == 1{
 		syncpid := &pb.SyncPid{}
 		proto.Unmarshal(pdata.Data, syncpid)
@@ -150,49 +150,64 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 	}else if pdata.MsgId == 200{
 		bdata := &pb.BroadCast{}
 		proto.Unmarshal(pdata.Data, bdata)
-		if bdata.Tp == 2{
+		if bdata.Tp == 2 && bdata.Pid == this.Pid{
+			//本人
 			this.X = bdata.GetP().X
 			this.Y = bdata.GetP().Y
-			this.Z = bdata.GetP().Z
 			this.V = bdata.GetP().V
 			fmt.Println(fmt.Sprintf("player ID: %d" , bdata.Pid))
-		}else{
+			go func() {
+				for{
+					this.WalkOrTalk()
+				}
+			}()
+		}else if bdata.Tp == 1{
 			fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
 		}
-		//聊天或者移动
-		time.Sleep(3*time.Second)
-		tp := rand.Intn(2)
-		if tp == 0{
-			//聊天
-			msg := &pb.Talk{
-				Content: "你猜猜我是谁？",
-			}
-			this.Send(2, msg)
+	}
+}
+
+func (this *TcpClient)WalkOrTalk(){
+	//聊天或者移动
+	time.Sleep(3*time.Second)
+	tp := rand.Intn(2)
+	if tp == 0{
+		//聊天
+		msg := &pb.Talk{
+			Content: "你猜猜我是谁？",
+		}
+		this.Send(2, msg)
+	}else{
+		//移动
+		x := this.X
+		z := this.Z
+		if x + 5 >=410{
+			x -= 5
+		}else if x - 5 < 85{
+			x += 5
+		}
+
+		if z + 5 >=400{
+			z -= 5
+		}else if z - 5 < 75{
+			z += 5
+		}
+		rv := rand.Intn(2)
+		v := this.V
+		if rv == 0{
+			v = 25
 		}else{
-			//移动
-			x := this.X
-			y := this.Y
-			if x >=410{
-				x -= 1
-			}else if x < 85{
-				x += 1
+			v = 335
+		}
+		msg := &pb.Position{
+			X: x,
+			Y: this.Y,
+			Z: z,
+			V: v,
 			}
 
-			if y >=400{
-				y -= 1
-			}else if y < 75{
-				y += 1
-			}
-			msg := &pb.MovePackege{
-				P : &pb.Position{
-				X: this.X + 1,
-				Z: this.Z + 1,
-				V: this.V,
-				},
-				ActionData: GenActionData(),
-			}
-			this.Send(3, msg)
-		}
+		fmt.Println(fmt.Sprintf("player ID: %d. Walking..." , this.Pid))
+		this.Send(3, msg)
 	}
 }
 
@@ -237,7 +252,7 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 2; i ++{
+	for i := 0; i< 200; i ++{
 		client := NewTcpClient("0.0.0.0", 8909)
 		client.Start()
 		time.Sleep(1*time.Second)

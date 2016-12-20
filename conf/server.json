@@ -1,7 +1,8 @@
 {
 	"TcpPort": 8909,
 	"StepPerMs": 2000,
-	"PoolSize": 10,
-	"LogLevel": 2,
+	"PoolSize": 100,
+	"IsUsePool": true,
+	"LogLevel": 1,
 	"MaxConn": 2000
 }

@@ -74,7 +74,7 @@ func NewAOIMgr(minX int32, maxX int32, minY int32, maxY int32, lenX int32, lenY 
 			logger.Info("grids==================")
 			for gridid, grid := range AOIObj.GetGrids(){
 				if len(grid.GetPids()) > 0{
-					logger.Info(fmt.Sprintf("grid: %d. %s", gridid, grid.GetPids()))
+					logger.Info(fmt.Sprintf("grid: %d. players: %d", gridid, len(grid.GetPids())))
 				}
 			}
 			time.Sleep(3*time.Second)
@@ -114,6 +114,7 @@ func (this *AOIMgr)InitGrid(){
 			this.grids[grid.ID] = grid
 		}
 	}
+	//logger.Info(this.grids)
 }
 
 func (this *AOIMgr)GetGridIDByPos(px float32, py float32) int32{
@@ -132,7 +133,7 @@ func (this *AOIMgr)GetGridIDByPos(px float32, py float32) int32{
 }
 
 func (this *AOIMgr)GetGridID(p *Player) int32{
-	return this.GetGridIDByPos(p.X, p.Y)
+	return this.GetGridIDByPos(p.X, p.Z)
 }
 
 func (this *AOIMgr)Add2AOI(p *Player) error{
@@ -140,7 +141,7 @@ func (this *AOIMgr)Add2AOI(p *Player) error{
 	if ok {
 		grid.Add(p.Pid)
 	}else{
-		return errors.New(fmt.Sprintf("Add2AOI 坐标有误: (%f, %f)", p.X, p.Y))
+		return errors.New(fmt.Sprintf("Add2AOI 坐标有误: (%f, %f)", p.X, p.Z))
 	}
 	return nil
 }
@@ -150,7 +151,7 @@ func (this *AOIMgr)LeaveAOI(p *Player) error{
 	if ok {
 		grid.Remove(p.Pid)
 	}else{
-		return errors.New(fmt.Sprintf("LeaveAOI 坐标有误: (%f, %f)", p.X, p.Y))
+		return errors.New(fmt.Sprintf("LeaveAOI 坐标有误: (%f, %f)", p.X, p.Z))
 	}
 	return nil
 }
@@ -160,7 +161,7 @@ func (this *AOIMgr)LeaveAOIFromGrid(p *Player, gridId int32) error{
 	if ok {
 		grid.Remove(p.Pid)
 	}else{
-		return errors.New(fmt.Sprintf("LeaveAOI 坐标有误: (%f, %f)", p.X, p.Y))
+		return errors.New(fmt.Sprintf("LeaveAOI 坐标有误: (%f, %f)", p.X, p.Z))
 	}
 	return nil
 }
@@ -188,13 +189,13 @@ func (this *AOIMgr)GetSurroundingByGridId(gridId int32) ([]*Grid, error){
 		}
 
 		for _, p := range pos{
-			if gridId / this.lenX > 0{
+			if p / this.lenX > 0 || (p > 0 && p / this.lenX == 0){
 				//有下面的格子
 				grids = append(grids, this.grids[p - this.lenX])
 			}
-			if gridId / this.lenX < this.lenX - 1{
+			if p / this.lenX <= this.lenX - 1{
 				//有上面的格子
-				grids = append(grids, this.grids[p - this.lenX])
+				grids = append(grids, this.grids[p + this.lenX])
 			}
 		}
 	}else{
@@ -219,8 +220,8 @@ func (this *AOIMgr)GetSurroundingGrids(px float32, py float32) ([]*Grid, error){
 
 func (this *AOIMgr)GetSurroundingPids(p *Player) ([]int32, error){
 	pids := make([]int32, 0)
-	grids, err := this.GetSurroundingGrids(p.X, p.Y)
-	logger.Info(len(grids))
+	grids, err := this.GetSurroundingGrids(p.X, p.Z)
+
 	if err == nil{
 		for _, grid := range grids{
 			pids = append(pids, grid.GetPids()...)
@@ -228,7 +229,7 @@ func (this *AOIMgr)GetSurroundingPids(p *Player) ([]int32, error){
 	}else{
 		return nil, err
 	}
-	logger.Info(len(pids))
+
 	return pids, nil
 }
 

@@ -12,9 +12,10 @@ import (
 type Player struct {
 	Fconn iface.Iconnection
 	Pid   int32
-	X     float32
-	Y     float32
-	V     float32
+	X     float32//平面x
+	Y     float32//高度
+	Z     float32//平面y!!!!!注意不是Y
+	V     float32//旋转0-360度
 }
 
 func NewPlayer(fconn iface.Iconnection, pid int32) *Player {
@@ -22,7 +23,8 @@ func NewPlayer(fconn iface.Iconnection, pid int32) *Player {
 		Fconn: fconn,
 		Pid:   pid,
 		X:     float32(rand.Intn(10) + 160),
-		Y:     float32(rand.Intn(17) + 134),
+		Y:     0,
+		Z:     float32(rand.Intn(17) + 134),
 		V:     0,
 	}
 
@@ -41,6 +43,7 @@ func (this *Player) SyncSurrouding(){
 	//		P: &pb.Position{
 	//			X: player.X,
 	//			Y: player.Y,
+	//			Z: player.Z,
 	//			V: player.V,
 	//		},
 	//	}
@@ -48,6 +51,7 @@ func (this *Player) SyncSurrouding(){
 	//}
 	/*aoi*/
 	pids, err := WorldMgrObj.AoiObj1.GetSurroundingPids(this)
+
 	if err == nil{
 		for _, pid := range pids{
 			player, err1 := WorldMgrObj.GetPlayer(pid)
@@ -57,6 +61,7 @@ func (this *Player) SyncSurrouding(){
 					P: &pb.Position{
 						X: player.X,
 						Y: player.Y,
+						Z: player.Z,
 						V: player.V,
 					},
 				}
@@ -69,6 +74,7 @@ func (this *Player) SyncSurrouding(){
 						P: &pb.Position{
 						X: this.X,
 						Y: this.Y,
+						Z: this.Z,
 						V: this.V,
 						},
 					},
@@ -76,6 +82,7 @@ func (this *Player) SyncSurrouding(){
 				player.SendMsg(200, data)
 			}
 		}
+
 		this.SendMsg(202, msg)
 	}else{
 		logger.Error(err)
@@ -83,21 +90,28 @@ func (this *Player) SyncSurrouding(){
 
 }
 
-func (this *Player) UpdatePos(x float32, y float32, v float32, action int32) {
-	oldGridId := WorldMgrObj.AoiObj1.GetGridIDByPos(this.X, this.Y)
+func (this *Player) UpdatePos(x float32, y float32, z float32,v float32) {
+	oldGridId := WorldMgrObj.AoiObj1.GetGridIDByPos(this.X, this.Z)
+	//更新位置的时候判断是否需要更新gridID
+	newGridId := WorldMgrObj.AoiObj1.GetGridIDByPos(x, z)
+
+	if newGridId < 0 || newGridId >= WorldMgrObj.AoiObj1.lenX * WorldMgrObj.AoiObj1.lenY{
+		//更新的坐标有误直接返回
+		return
+	}
 	//更新
 	this.X = x
 	this.Y = y
+	this.Z = z
 	this.V = v
-	//更新位置的时候判断是否需要更新gridID
-	newGridId := WorldMgrObj.AoiObj1.GetGridIDByPos(this.X, this.Y)
+
 	if oldGridId != newGridId{
 		WorldMgrObj.AoiObj1.LeaveAOIFromGrid(this, oldGridId)
 		WorldMgrObj.AoiObj1.Add2AOI(this)
 		//需要处理老的aoi消失和新的aoi出生
 		this.OnExchangeAoiGrid(oldGridId, newGridId)
 	}
-	WorldMgrObj.Move(this, action)
+	WorldMgrObj.Move(this)
 }
 
 func (this *Player)OnExchangeAoiGrid(oldGridId int32, newGridId int32) error{
@@ -141,6 +155,7 @@ func (this *Player)OnExchangeAoiGrid(oldGridId int32, newGridId int32) error{
 					P: &pb.Position{
 					X: this.X,
 					Y: this.Y,
+					Z: this.Z,
 					V: this.V,
 					},
 				},
@@ -155,6 +170,7 @@ func (this *Player)OnExchangeAoiGrid(oldGridId int32, newGridId int32) error{
 							P: &pb.Position{
 							X: p.X,
 							Y: p.Y,
+							Z: p.Z,
 							V: p.V,
 							},
 						},

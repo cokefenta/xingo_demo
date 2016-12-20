@@ -49,14 +49,14 @@ func (this *TestRouter) Api_2(request *fnet.PkgAll) {
 移动
  */
 func (this *TestRouter) Api_3(request *fnet.PkgAll) {
-	msg := &pb.MovePackege{}
+	msg := &pb.Position{}
 	err := proto.Unmarshal(request.Pdata.Data, msg)
 	if err == nil {
-		logger.Debug(fmt.Sprintf("user move: (%f, %f, %d)", msg.P.X, msg.P.Y, msg.ActionData))
+		logger.Debug(fmt.Sprintf("user move: (%f, %f, %f, %f)", msg.X, msg.Y, msg.Z, msg.V))
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil{
 			p, _ := core.WorldMgrObj.GetPlayer(pid.(int32))
-			p.UpdatePos(msg.P.X, msg.P.Y, msg.P.V, msg.ActionData)
+			p.UpdatePos(msg.X, msg.Y, msg.Z, msg.V)
 		}else{
 			logger.Error(err1)
 			request.Fconn.LostConnection()

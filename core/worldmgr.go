@@ -22,7 +22,7 @@ func init() {
 	WorldMgrObj = &WorldMgr{
 		PlayerNumGen:    0,
 		Players:         make(map[int32]*Player),
-		AoiObj1:          NewAOIMgr(85, 410, 75, 400, 20, 20),
+		AoiObj1:          NewAOIMgr(85, 410, 75, 400, 10, 20),
 	}
 }
 
@@ -37,8 +37,6 @@ func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 		Pid: p.Pid,
 	}
 	p.SendMsg(1, msg)
-	//出现在出生点
-	//this.Move(p, -1)
 	//加到aoi
 	this.AoiObj1.Add2AOI(p)
 	//周围的人
@@ -54,32 +52,29 @@ func (this *WorldMgr)RemovePlayer(pid int32){
 	delete(this.Players, pid)
 }
 
-func (this *WorldMgr)Move(p *Player, action int32){
+func (this *WorldMgr)Move(p *Player){
 	var data *pb.BroadCast
-	if action == -1{
-		//出生
-		data = &pb.BroadCast{
-			Pid : p.Pid,
-			Tp: 2,
-			Data: &pb.BroadCast_P{
-				P: &pb.Position{
-				X: p.X,
-				Y: p.Y,
-				V: p.V,
-				},
+	data = &pb.BroadCast{
+		Pid : p.Pid,
+		Tp: 4,
+		Data: &pb.BroadCast_P{
+			P: &pb.Position{
+			X: p.X,
+			Y: p.Y,
+			Z: p.Z,
+			V: p.V,
 			},
+		},
+	}
+	/*aoi*/
+	pids, err := this.AoiObj1.GetSurroundingPids(p)
+	if err == nil{
+		for _, pid := range pids{
+			player, err1 := this.GetPlayer(pid)
+			if err1 == nil{
+				player.SendMsg(200, data)
+			}
 		}
-		p.SendMsg(200, data)
-	}else{
-		//不广播坐标, 广播动作数据
-		data = &pb.BroadCast{
-			Pid : p.Pid,
-			Tp: 3,
-			Data: &pb.BroadCast_ActionData{
-				ActionData: action,
-			},
-		}
-		this.Broadcast(200, data)
 	}
 }
 
