@@ -13,7 +13,8 @@
 ./client_walk
 3)在window上面跑unity pc客户端测试, pc包路径： xingo_demo/unity3d/bin/client.exe
 
-消息对应关系如下
+消息对应关系如下<br>
+
 |msgId            |client                 |server               |描述|
 | -------- | -------- | -------- | -------- |
 |1                  |-                    |SyncPid              |同步玩家本次登录的ID(用来标识玩家)|
