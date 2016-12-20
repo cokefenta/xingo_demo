@@ -210,7 +210,7 @@ func (this *Player) Talk(content string){
 		},
 	}
 
-	WorldMgrObj.Broadcast(200, data)
+	WorldMgrObj.BroadcastBuff(200, data)
 }
 
 func (this *Player) LostConnection(){
@@ -223,5 +223,11 @@ func (this *Player) LostConnection(){
 func (this *Player) SendMsg(msgId uint32, data proto.Message) {
 	if this.Fconn != nil {
 		this.Fconn.Send(msgId, data)
+	}
+}
+
+func (this *Player) SendBuffMsg(msgId uint32, data proto.Message) {
+	if this.Fconn != nil {
+		this.Fconn.SendBuff(msgId, data)
 	}
 }

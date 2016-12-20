@@ -154,6 +154,7 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 			//本人
 			this.X = bdata.GetP().X
 			this.Y = bdata.GetP().Y
+			this.Z = bdata.GetP().Z
 			this.V = bdata.GetP().V
 			fmt.Println(fmt.Sprintf("player ID: %d" , bdata.Pid))
 			go func() {
@@ -181,17 +182,29 @@ func (this *TcpClient)WalkOrTalk(){
 		//移动
 		x := this.X
 		z := this.Z
-		if x + 5 >=410{
-			x -= 5
-		}else if x - 5 < 85{
-			x += 5
+
+		rrr := rand.Intn(2)
+		if rrr == 0{
+			x -= float32(rand.Intn(10))
+			z -= float32(rand.Intn(10))
+		}else{
+			x += float32(rand.Intn(10))
+			z += float32(rand.Intn(10))
 		}
 
-		if z + 5 >=400{
-			z -= 5
-		}else if z - 5 < 75{
-			z += 5
+		//纠正坐标位置
+		if x > 410{
+			x = 410
+		}else if x < 85{
+			x = 85
 		}
+
+		if z > 400{
+			z = 400
+		}else if z < 75{
+			z = 75
+		}
+
 		rv := rand.Intn(2)
 		v := this.V
 		if rv == 0{
@@ -252,7 +265,7 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 200; i ++{
+	for i := 0; i< 1; i ++{
 		client := NewTcpClient("0.0.0.0", 8909)
 		client.Start()
 		time.Sleep(1*time.Second)

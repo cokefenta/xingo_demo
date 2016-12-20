@@ -104,6 +104,14 @@ func (this *WorldMgr) Broadcast(msgId uint32, data proto.Message) {
 	}
 }
 
+func (this *WorldMgr) BroadcastBuff(msgId uint32, data proto.Message) {
+	this.RLock()
+	defer this.RUnlock()
+	for _, p := range this.Players {
+		p.SendBuffMsg(msgId, data)
+	}
+}
+
 func (this *WorldMgr) AOIBroadcast(p *Player, msgId uint32, data proto.Message) {
 	/*aoi*/
 	pids, err := WorldMgrObj.AoiObj1.GetSurroundingPids(p)
