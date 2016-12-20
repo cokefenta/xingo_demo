@@ -163,7 +163,7 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 				}
 			}()
 		}else if bdata.Tp == 1{
-			fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
+			//fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
 		}
 	}
 }
@@ -174,10 +174,10 @@ func (this *TcpClient)WalkOrTalk(){
 	tp := rand.Intn(2)
 	if tp == 0{
 		//聊天
-		msg := &pb.Talk{
-			Content: "你猜猜我是谁？",
-		}
-		this.Send(2, msg)
+		//msg := &pb.Talk{
+		//	Content: "你猜猜我是谁？",
+		//}
+		//this.Send(2, msg)
 	}else{
 		//移动
 		x := this.X
@@ -265,8 +265,8 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 1; i ++{
-		client := NewTcpClient("0.0.0.0", 8909)
+	for i := 0; i< 3; i ++{
+		client := NewTcpClient("0.0.0.0", 8999)
 		client.Start()
 		time.Sleep(1*time.Second)
 	}

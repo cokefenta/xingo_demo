@@ -35,7 +35,6 @@ func NewPlayer(fconn iface.Iconnection, pid int32) *Player {
 同步周围玩家
  */
 func (this *Player) SyncSurrouding(){
-	msg := &pb.SyncPlayers{}
 	/*暂时取全部, 等aoi模块完成*/
 	//for pid, player := range WorldMgrObj.Players{
 	//	p := &pb.Player{
@@ -53,6 +52,7 @@ func (this *Player) SyncSurrouding(){
 	pids, err := WorldMgrObj.AoiObj1.GetSurroundingPids(this)
 
 	if err == nil{
+		msg := &pb.SyncPlayers{}
 		for _, pid := range pids{
 			player, err1 := WorldMgrObj.GetPlayer(pid)
 			if err1 == nil {
@@ -82,8 +82,21 @@ func (this *Player) SyncSurrouding(){
 				player.SendMsg(200, data)
 			}
 		}
-
-		this.SendMsg(202, msg)
+		//分包发送
+		per := 20
+		ps := msg.Ps
+		for i:=0; ;i++{
+			if i*per > len(ps) - 1{
+				break
+			}
+			if i*per + per > len(ps) - 1{
+				msg.Ps = ps[i*per:]
+			}else{
+				msg.Ps = ps[i*per: i*per + per]
+			}
+			this.SendMsg(202, msg)
+		}
+		//this.SendMsg(202, msg)
 	}else{
 		logger.Error(err)
 	}
@@ -162,21 +175,23 @@ func (this *Player)OnExchangeAoiGrid(oldGridId int32, newGridId int32) error{
 			}
 			for _, pid := range grid.GetPids(){
 				if pid != this.Pid{
-					p, _ := WorldMgrObj.GetPlayer(pid)
-					pdata := &pb.BroadCast{
-						Pid : p.Pid,
-						Tp: 2,
-						Data: &pb.BroadCast_P{
-							P: &pb.Position{
-							X: p.X,
-							Y: p.Y,
-							Z: p.Z,
-							V: p.V,
+					p, err := WorldMgrObj.GetPlayer(pid)
+					if err == nil{
+						pdata := &pb.BroadCast{
+							Pid : p.Pid,
+							Tp: 2,
+							Data: &pb.BroadCast_P{
+								P: &pb.Position{
+								X: p.X,
+								Y: p.Y,
+								Z: p.Z,
+								V: p.V,
+								},
 							},
-						},
+						}
+						p.SendMsg(200, data)
+						this.SendMsg(200, pdata)
 					}
-					p.SendMsg(200, data)
-					this.SendMsg(200, pdata)
 				}
 
 			}
@@ -188,12 +203,14 @@ func (this *Player)OnExchangeAoiGrid(oldGridId int32, newGridId int32) error{
 			}
 			for _, pid := range grid.GetPids(){
 				if pid != this.Pid{
-					p, _ := WorldMgrObj.GetPlayer(pid)
-					pdata := &pb.SyncPid{
-						Pid: p.Pid,
+					p, err := WorldMgrObj.GetPlayer(pid)
+					if err == nil{
+						pdata := &pb.SyncPid{
+							Pid: p.Pid,
+						}
+						p.SendMsg(201, data)
+						this.SendMsg(201, pdata)
 					}
-					p.SendMsg(201, data)
-					this.SendMsg(201, pdata)
 				}
 			}
 		}
