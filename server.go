@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/viphxin/xingo/fserver"
 	"github.com/viphxin/xingo/iface"
 	"github.com/viphxin/xingo/logger"
@@ -11,8 +10,6 @@ import (
 
 	_ "net/http"
 	_ "net/http/pprof"
-	"os"
-	"os/signal"
 	_ "runtime/pprof"
 	_ "time"
 )
@@ -33,6 +30,10 @@ func DoConnectionLost(fconn iface.Iconnection) {
 	p.LostConnection()
 }
 
+func DoStop(){
+	logger.Debug("onstop !!!!!!!!!!!!!!")
+}
+
 func main() {
 	s := fserver.NewServer()
 
@@ -43,6 +44,7 @@ func main() {
 	//regest callback
 	utils.GlobalObject.OnConnectioned = DoConnectionMade
 	utils.GlobalObject.OnClosed = DoConnectionLost
+	utils.GlobalObject.OnServerStop = DoStop
 
 	// go func() {
 	// 	fmt.Println(http.ListenAndServe("localhost:6061", nil))
@@ -56,12 +58,5 @@ func main() {
 	// 	// 	fm.Close()
 	// 	// }
 	// }()
-
-	s.Start()
-	// close
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
-	sig := <-c
-	fmt.Println("=======", sig)
-	s.Stop()
+	s.Serve()
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/viphxin/xingo/iface"
 	"xingo_demo/pb"
-	"sync"
 	"github.com/viphxin/xingo/logger"
 )
 
@@ -13,7 +12,6 @@ type WorldMgr struct {
 	PlayerNumGen int32
 	Players      map[int32]*Player
 	AoiObj1       *AOIMgr//地图1
-	sync.RWMutex
 }
 
 var WorldMgrObj *WorldMgr
@@ -27,11 +25,9 @@ func init() {
 }
 
 func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
-	this.Lock()
 	this.PlayerNumGen += 1
 	p := NewPlayer(fconn, this.PlayerNumGen)
 	this.Players[p.Pid] = p
-	this.Unlock()
 	//同步Pid
 	msg := &pb.SyncPid{
 		Pid: p.Pid,
@@ -45,8 +41,6 @@ func (this *WorldMgr)AddPlayer(fconn iface.Iconnection) (*Player, error) {
 }
 
 func (this *WorldMgr)RemovePlayer(pid int32){
-	this.Lock()
-	defer this.Unlock()
 	//从aoi移除
 	this.AoiObj1.LeaveAOI(this.Players[pid])
 	delete(this.Players, pid)
@@ -86,8 +80,6 @@ func (this *WorldMgr)SendMsgByPid(pid int32, msgId uint32, data proto.Message){
 }
 
 func (this *WorldMgr) GetPlayer(pid int32)(*Player, error){
-	this.RLock()
-	defer this.RUnlock()
 	p, ok := this.Players[pid]
 	if ok{
 		return p, nil
@@ -97,16 +89,12 @@ func (this *WorldMgr) GetPlayer(pid int32)(*Player, error){
 }
 
 func (this *WorldMgr) Broadcast(msgId uint32, data proto.Message) {
-	this.RLock()
-	defer this.RUnlock()
 	for _, p := range this.Players {
 		p.SendMsg(msgId, data)
 	}
 }
 
 func (this *WorldMgr) BroadcastBuff(msgId uint32, data proto.Message) {
-	this.RLock()
-	defer this.RUnlock()
 	for _, p := range this.Players {
 		p.SendBuffMsg(msgId, data)
 	}

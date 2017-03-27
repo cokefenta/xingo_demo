@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/viphxin/xingo/logger"
 	_ "time"
-	"sync"
 	"time"
 )
 
@@ -19,24 +18,17 @@ type Grid struct {
 	maxX int32
 	maxY int32
 	pids map[int32]bool
-	sync.RWMutex
 }
 
 func (this *Grid)Add(pid int32){
-	this.Lock()
-	defer this.Unlock()
 	this.pids[pid] = true
 }
 
 func (this *Grid)Remove(pid int32){
-	this.Lock()
-	defer this.Unlock()
 	delete(this.pids, pid)
 }
 
 func (this *Grid)GetPids() []int32{
-	this.RLock()
-	defer this.RUnlock()
 	pids := make([]int32, 0)
 	for pid, _ :=range this.pids{
 		pids = append(pids, pid)

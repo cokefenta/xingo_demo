@@ -8,6 +8,7 @@ import (
 	"github.com/viphxin/xingo/logger"
 	_ "time"
 	"fmt"
+	"github.com/viphxin/xingo/utils"
 )
 
 type TestRouter struct {
@@ -19,7 +20,7 @@ ping test
 func (this *TestRouter) Api_0(request *fnet.PkgAll) {
 	logger.Debug("call Api_0")
 	// request.Fconn.SendBuff(0, nil)
-	packdata, err := fnet.DefaultDataPack.Pack(0, nil)
+	packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(0, nil)
 	if err == nil{
 		request.Fconn.Send(packdata)
 	}else{
