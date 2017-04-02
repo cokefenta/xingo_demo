@@ -4,5 +4,7 @@
 	"PoolSize": 10,
 	"IsUsePool": true,
 	"LogLevel": 1,
-	"MaxConn": 2000
+	"MaxConn": 2000,
+	"MaxPacketSize": 1024,
+	"FrequencyControl": "100/s"
 }

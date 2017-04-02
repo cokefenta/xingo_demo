@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/viphxin/xingo/logger"
-	_ "time"
-	"time"
+	"github.com/viphxin/xingo/utils"
 )
 
 /*
@@ -61,19 +60,18 @@ func NewAOIMgr(minX int32, maxX int32, minY int32, maxY int32, lenX int32, lenY 
 	}
 	AOIObj.InitGrid()
 	//debug
-	go func(){
-		for{
-			logger.Info("grids==================")
-			for gridid, grid := range AOIObj.GetGrids(){
-				if len(grid.GetPids()) > 0{
-					logger.Info(fmt.Sprintf("grid: %d. players: %d", gridid, len(grid.GetPids())))
-				}
-			}
-			time.Sleep(3*time.Second)
-		}
-
-	}()
+	AOIObj.Display()
 	return AOIObj
+}
+
+func (this *AOIMgr)Display(args ...interface{}){
+	logger.Info("grids==================")
+	for gridid, grid := range this.GetGrids(){
+		if len(grid.GetPids()) > 0{
+			logger.Info(fmt.Sprintf("grid: %d. players: %d", gridid, len(grid.GetPids())))
+		}
+	}
+	utils.GlobalObject.GsTimeScheduel.CreateTimer(int64(3*1e3), this.Display, nil)
 }
 
 func (this *AOIMgr)GetGrids() map[int32]*Grid{
