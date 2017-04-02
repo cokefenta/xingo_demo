@@ -265,8 +265,8 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 300; i ++{
-		client := NewTcpClient("127.0.0.1", 8999)
+	for i := 0; i< 50; i ++{
+		client := NewTcpClient("192.168.31.40", 8999)
 		client.Start()
 		time.Sleep(1*time.Millisecond)
 	}
