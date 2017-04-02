@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"github.com/viphxin/xingo/logger"
 	"errors"
-	"github.com/viphxin/xingo/fnet"
+	"github.com/viphxin/xingo/utils"
 )
 
 type Player struct {
@@ -240,7 +240,7 @@ func (this *Player) LostConnection(){
 
 func (this *Player) SendMsg(msgId uint32, data proto.Message) {
 	if this.Fconn != nil {
-		packdata, err := fnet.DefaultDataPack.Pack(msgId, data)
+		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
 		if err == nil{
 			this.Fconn.Send(packdata)
 		}else{
@@ -251,7 +251,7 @@ func (this *Player) SendMsg(msgId uint32, data proto.Message) {
 
 func (this *Player) SendBuffMsg(msgId uint32, data proto.Message) {
 	if this.Fconn != nil {
-		packdata, err := fnet.DefaultDataPack.Pack(msgId, data)
+		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
 		if err == nil{
 			this.Fconn.SendBuff(packdata)
 		}else{

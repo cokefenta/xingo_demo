@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/viphxin/xingo/fserver"
 	"github.com/viphxin/xingo/iface"
 	"github.com/viphxin/xingo/logger"
@@ -11,8 +10,6 @@ import (
 
 	_ "net/http"
 	_ "net/http/pprof"
-	"os"
-	"os/signal"
 	_ "runtime/pprof"
 	_ "time"
 )
@@ -57,11 +54,12 @@ func main() {
 	// 	// }
 	// }()
 
-	s.Start()
-	// close
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
-	sig := <-c
-	fmt.Println("=======", sig)
-	s.Stop()
+	//s.Start()
+	//// close
+	//c := make(chan os.Signal, 1)
+	//signal.Notify(c, os.Interrupt, os.Kill)
+	//sig := <-c
+	//fmt.Println("=======", sig)
+	//s.Stop()
+	s.Serve()
 }
