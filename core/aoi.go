@@ -7,6 +7,8 @@ import (
 	_ "time"
 	"sync"
 	"time"
+	"github.com/viphxin/xingo/utils"
+	"github.com/viphxin/xingo/timer"
 )
 
 /*
@@ -56,6 +58,17 @@ type AOIMgr struct {
 	lenY int32
 	grids map[int32]*Grid
 }
+func debugPrintFunc(params ...interface{}){
+	logger.Info("grids safe==================")
+	for gridid, grid := range WorldMgrObj.AoiObj1.GetGrids() {
+		if len(grid.GetPids()) > 0 {
+			logger.Info(fmt.Sprintf("grid: %d. players: %d", gridid, len(grid.GetPids())))
+		}
+	}
+
+	utils.GlobalObject.GetSafeTimer().CreateTimer(3000, debugPrintFunc, []interface{}{new(timer.ParamNull)})
+
+}
 
 func NewAOIMgr(minX int32, maxX int32, minY int32, maxY int32, lenX int32, lenY int32) *AOIMgr{
 	AOIObj := &AOIMgr{
@@ -69,18 +82,22 @@ func NewAOIMgr(minX int32, maxX int32, minY int32, maxY int32, lenX int32, lenY 
 	}
 	AOIObj.InitGrid()
 	//debug
-	go func(){
-		for{
-			logger.Info("grids==================")
-			for gridid, grid := range AOIObj.GetGrids(){
-				if len(grid.GetPids()) > 0{
-					logger.Info(fmt.Sprintf("grid: %d. players: %d", gridid, len(grid.GetPids())))
-				}
-			}
-			time.Sleep(3*time.Second)
-		}
 
-	}()
+	if utils.GlobalObject.GetSafeTimer() != nil{
+		utils.GlobalObject.GetSafeTimer().CreateTimer(3000, debugPrintFunc, nil)
+	}else{
+		go func() {
+			for {
+				logger.Info("grids==================")
+				for gridid, grid := range AOIObj.GetGrids() {
+					if len(grid.GetPids()) > 0 {
+						logger.Info(fmt.Sprintf("grid: %d. players: %d", gridid, len(grid.GetPids())))
+					}
+				}
+				time.Sleep(3 * time.Second)
+			}
+		}()
+	}
 	return AOIObj
 }
 

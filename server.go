@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/viphxin/xingo/fserver"
 	"github.com/viphxin/xingo/iface"
 	"github.com/viphxin/xingo/logger"
 	"github.com/viphxin/xingo/utils"
@@ -12,6 +11,8 @@ import (
 	_ "net/http/pprof"
 	_ "runtime/pprof"
 	_ "time"
+	"github.com/viphxin/xingo"
+	"xingo_demo/cmd"
 )
 
 func DoConnectionMade(fconn iface.Iconnection) {
@@ -31,7 +32,12 @@ func DoConnectionLost(fconn iface.Iconnection) {
 }
 
 func main() {
-	s := fserver.NewServer()
+	s := xingo.NewXingoTcpServer()
+
+	//add gm command
+	if utils.GlobalObject.CmdInterpreter != nil{
+		utils.GlobalObject.CmdInterpreter.AddCommand(cmd.NewOnlineCommand())
+	}
 
 	//add api ---------------start
 	TestRouterObj := &api.TestRouter{}
