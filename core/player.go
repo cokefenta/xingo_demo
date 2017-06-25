@@ -229,6 +229,7 @@ func (this *Player) Talk(content string){
 	}
 
 	WorldMgrObj.BroadcastBuff(200, data)
+	//WorldMgrObj.Broadcast(200, data)
 }
 
 func (this *Player) LostConnection(){

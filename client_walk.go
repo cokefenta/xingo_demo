@@ -163,7 +163,7 @@ func (this *TcpClient)DoMsg(pdata *PkgData){
 				}
 			}()
 		}else if bdata.Tp == 1{
-			//fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
+			fmt.Println(fmt.Sprintf("世界聊天,玩家%d: %s", bdata.Pid, bdata.GetContent()))
 		}
 	}
 }
@@ -265,7 +265,7 @@ func (this *TcpClient)Start(){
 }
 
 func main() {
-	for i := 0; i< 10; i ++{
+	for i := 0; i< 1; i ++{
 		//client := NewTcpClient("192.168.31.40", 8999)
 		client := NewTcpClient("127.0.0.1", 8999)
 		client.Start()

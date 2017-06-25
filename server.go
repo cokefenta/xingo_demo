@@ -40,8 +40,9 @@ func main() {
 	}
 
 	//add api ---------------start
-	TestRouterObj := &api.TestRouter{}
-	s.AddRouter(TestRouterObj)
+	s.AddRouter("0", &api.Api0Router{})
+	s.AddRouter("2", &api.Api2Router{})
+	s.AddRouter("3", &api.Api3Router{})
 	//add api ---------------end
 	//regest callback
 	utils.GlobalObject.OnConnectioned = DoConnectionMade
